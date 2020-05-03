@@ -6,11 +6,9 @@ from threading import Thread, Lock
 from typing import Union, Dict
 
 import telegram
-from dotenv import load_dotenv, find_dotenv
 from requests_html import HTML, HTMLSession
 from pytablewriter import MarkdownTableWriter
 from twitter_scraper import Profile
-
 
 class FileNotFound(Exception):
     pass
@@ -18,12 +16,12 @@ class FileNotFound(Exception):
 
 class Stalker(object):
     def __init__(self):
-        load_dotenv(find_dotenv())
+        config_path = os.path.dirname(os.path.realpath(__file__))+"/configs.json"
 
-        if not os.path.exists("./configs.json"):
+        if not os.path.exists(config_path):
             raise FileNotFound("configs.json not found!")
 
-        self.configs = json.loads(open("./configs.json").read())
+        self.configs = json.loads(open(config_path).read())
 
         self.telegram = telegram.Bot(self.configs["telegram"]["token"])
         self.lock = Lock()
