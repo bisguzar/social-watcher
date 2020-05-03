@@ -28,7 +28,7 @@ List of metrics which one watching.
 
 ## Customizing Configs
 
-```json
+```
 {
     "interval": 300, # general interval time, default is 86400 (1 day)
 
