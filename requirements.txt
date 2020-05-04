@@ -23,7 +23,6 @@ pyppeteer==0.0.25
 pyquery==1.4.1
 pytablewriter==0.51.0
 python-dateutil==2.8.1
-python-dotenv==0.13.0
 python-telegram-bot==12.6.1
 pytz==2019.3
 requests==2.23.0
