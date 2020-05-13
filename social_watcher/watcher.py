@@ -1,7 +1,7 @@
 import os
 import json
 import time
-import models
+from . import models
 from threading import Thread, Lock
 from typing import Union, Dict
 
@@ -10,20 +10,20 @@ from requests_html import HTML, HTMLSession
 from pytablewriter import MarkdownTableWriter
 from twitter_scraper import Profile
 
+
 class FileNotFound(Exception):
     pass
 
 
-class Stalker(object):
-    def __init__(self):
-        config_path = os.path.dirname(os.path.realpath(__file__))+"/configs.json"
+class Watcher(object):
+    def __init__(self, configs):
+        self.configs = configs
 
-        if not os.path.exists(config_path):
-            raise FileNotFound("configs.json not found!")
+        if configs.get("telegram", None):
+            self.telegram = telegram.Bot(self.configs["telegram"]["token"])
+        else:
+            self.telegram = None
 
-        self.configs = json.loads(open(config_path).read())
-
-        self.telegram = telegram.Bot(self.configs["telegram"]["token"])
         self.lock = Lock()
 
         self.session = HTMLSession()
@@ -39,6 +39,9 @@ class Stalker(object):
                 Thread(target=self.watch_instagram, args=(account,)).start()
 
     def send_message(self, message):
+        if not self.telegram:
+            return
+
         self.telegram.send_message(
             self.configs["telegram"]["chat_id"],
             message.replace(".", "\."),
@@ -50,7 +53,7 @@ class Stalker(object):
         del current_data["username"]
 
         # change 'likes_count' to 'likes'
-        for key,value in current_data.copy().items():
+        for key, value in current_data.copy().items():
             if key.endswith("_count"):
                 current_data[key.split("_")[0]] = value
                 del current_data[key]
@@ -87,7 +90,11 @@ class Stalker(object):
     def watch_instagram(self, account: dict) -> None:
         def _get_source():
             try:
-                return HTMLSession().get(f"https://www.instagram.com/{account['username']}/").html
+                return (
+                    HTMLSession()
+                    .get(f"https://www.instagram.com/{account['username']}/")
+                    .html
+                )
             except:
                 _get_source()
 
@@ -148,13 +155,7 @@ class Stalker(object):
                     "last_timestamp": last_data.timestamp,
                     "current": current_data[key],
                 }
-                if key in (
-                    "followers",
-                    "following",
-                    "posts",
-                    "likes",
-                    "tweets",
-                ):
+                if key in ("followers", "following", "posts", "likes", "tweets",):
                     _changed_datas[key]["change"] = (
                         current_data[key] - last_data.data[key]
                     )
@@ -185,8 +186,3 @@ class Stalker(object):
         table.margin = 1
 
         return table.dumps()
-
-
-if __name__ == "__main__":
-    stalker = Stalker()
-    stalker.start()
