@@ -13,9 +13,22 @@ Before you begin, ensure you have met the following requirements:
 
 ## Installing social-watcher
 
-First, clone repository to local and install requirements. You can install requirements with ```pip3 install -r requirements.txt```. <br />
-Then you need to edit *configs.json.example* as you wish and rename it to *configs.json*. At the end you can run *watcher.py*
+You can install, configure and run *social-watcher* with 3 basic steps.
 
+**1- Install from PyPI**
+```
+$ pip3 install social-watcher
+```
+
+**2- Create configuration file**
+```
+$ social-watcher --configure
+```
+
+**3- Run with configurations**
+```
+$ social-watcher --config watcher.json
+```
 
 ## Metrics
 
